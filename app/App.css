@@ -1,0 +1,113 @@
+/* App.css - Custom styles for Promo Dome */
+
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@700&family=Roboto:wght@400;500;700&display=swap'); /* Example fonts, adjust if specific fonts are known */
+
+body {
+  font-family: 'Roboto', sans-serif; /* Default font */
+}
+
+/* Custom Title Styles */
+.promo-title-main {
+  font-family: 'Montserrat', sans-serif; /* Bold font for PROMO */
+  color: #E91E63; /* Pink/Red color - adjust exact hex code from image if possible */
+  letter-spacing: 0.05em; /* Adjust spacing */
+}
+
+.promo-title-dome {
+  font-family: 'Montserrat', sans-serif; /* Bold font for DOME */
+  color: #E91E63; /* Pink/Red color */
+  letter-spacing: 0.3em; /* Wide spacing for DOME */
+  margin-top: -10px; /* Adjust vertical spacing */
+}
+
+/* Align labels and inputs */
+.flex.items-center.space-x-3 > .w-28 {
+    text-align: right;
+    font-weight: 600; /* Semibold */
+}
+
+.flex.space-x-3 > .w-28 {
+    text-align: right;
+    font-weight: 600; /* Semibold */
+}
+
+/* Button Styles */
+.roll-dice-btn {
+    background-color: #4CAF50; /* Green */
+    border: none;
+}
+.roll-dice-btn:hover {
+    background-color: #45a049;
+}
+
+.start-promo-btn {
+    background-color: #66BB6A; /* Lighter Green */
+    border: 2px solid #4CAF50;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    position: relative; /* Needed for absolute positioning of icons */
+    padding-left: 2.5rem; /* Space for left icon */
+    padding-right: 2.5rem; /* Space for right icon */
+    text-transform: uppercase; /* Uppercase text */
+    font-weight: bold;
+}
+.start-promo-btn:hover {
+    background-color: #5eac61;
+}
+.start-promo-btn:disabled {
+    background-color: #a5d6a7; /* Lighter green when disabled */
+    border-color: #81c784;
+    cursor: not-allowed;
+    opacity: 0.7;
+}
+
+.crown-icon {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #FFD700; /* Gold color */
+}
+.crown-icon.left-2 { left: 0.75rem; } /* Adjust position */
+.crown-icon.right-2 { right: 0.75rem; } /* Adjust position */
+
+.cancel-promo-btn {
+    background-color: #F44336; /* Red */
+    border: none;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    text-transform: uppercase; /* Uppercase text */
+    font-weight: bold;
+}
+.cancel-promo-btn:hover {
+    background-color: #e53935;
+}
+
+/* Tooltip Customization (Optional - if default needs override) */
+/* .tooltip-content-custom { ... } */
+
+/* Ensure card takes precedence over global styles if needed */
+.dark .dark\:bg-gray-800 {
+    background-color: #2d3748; /* Example dark mode card background */
+}
+
+/* Adjust placeholder text color */
+.placeholder-gray-400::placeholder {
+    color: #a0aec0;
+}
+.dark .dark\:placeholder-gray-500::placeholder {
+    color: #718096;
+}
+
+/* Info icon button subtle styling */
+.text-gray-500.hover\:text-gray-700 {
+    color: #6b7280;
+}
+.text-gray-500.hover\:text-gray-700:hover {
+    color: #374151;
+}
+.dark .dark\:text-gray-400.dark\:hover\:text-gray-200 {
+    color: #9ca3af;
+}
+.dark .dark\:text-gray-400.dark\:hover\:text-gray-200:hover {
+    color: #e5e7eb;
+}
+
+
