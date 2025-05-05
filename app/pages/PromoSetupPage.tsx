@@ -177,7 +177,9 @@ const PromoSetupPage: React.FC<PromoSetupPageProps> = ({ onPromoComplete }) => {
 
         <Card className="w-full max-w-3xl shadow-lg bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
           {/* Custom Header */}
+          
           <CardHeader className="text-center p-6 border-b border-gray-200 dark:border-gray-700">
+            <h1 className="Dev-promo text-3xl font-bold tracking-[0.3em] text-sky-400 bg--500  absolut top left-0"> Dev info-PAGE LAYOUT</h1>
             <h1 className="promo-title-main text-5xl font-bold tracking-wider mb-1">PROMO</h1>
             <h2 className="promo-title-dome text-4xl font-bold tracking-[0.3em]">DOME</h2>
           </CardHeader>
