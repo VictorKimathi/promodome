@@ -38,6 +38,8 @@ interface PromoSetupPageProps {
 }
 
 const PromoSetupPage: React.FC<PromoSetupPageProps> = ({ onPromoComplete }) => {
+  
+
   const [promoTitle, setPromoTitle] = useState('');
   const [entriesInput, setEntriesInput] = useState('');
   const [numberOfRoundsInput, setNumberOfRoundsInput] = useState(''); // Input field value
@@ -225,12 +227,11 @@ const PromoSetupPage: React.FC<PromoSetupPageProps> = ({ onPromoComplete }) => {
                </Tooltip>
             </div>
 
-            {/* Dice Selection Component - Conditionally Rendered */}
-            {roundsMode === 'dice_prompt' && (
-                <div className="pl-32"> {/* Indent to align under inputs */}
+            {/* {roundsMode === 'dice_prompt' && (
+                <div className="pl-32">
                     <DiceSelection onDiceRollComplete={handleDiceRollComplete} />
                 </div>
-            )}
+            )} */}
             {roundsMode === 'dice_rolled' && finalNumberOfRounds !== null && (
                  <div className="pl-32 text-center py-2 text-green-700 dark:text-green-300 font-bold">
                     <p>Rounds set to: <span className="text-xl">{finalNumberOfRounds}</span> (via dice roll)</p>
@@ -254,15 +255,50 @@ const PromoSetupPage: React.FC<PromoSetupPageProps> = ({ onPromoComplete }) => {
                         </TooltipContent>
                     </Tooltip>
                 </div>
-                <Textarea
-                  id="entries"
-                  value={entriesInput}
-                  onChange={handleEntriesChange}
-                  rows={10}
-                  className="dark:bg-gray-700 dark:text-white dark:border-gray-600 resize-y min-h-[150px] placeholder-gray-400 dark:placeholder-gray-500"
-                  placeholder="Entry 1\nEntry 2\nEntry 3..."
-                  disabled={isProcessing}
-                />
+                <div className="flex flex-row gap-6 items-start">
+  {/* Left: Textarea */}
+  <div className="flex-1">
+    <Label htmlFor="entries">Entries (one per line)</Label>
+    <Textarea
+      id="entries"
+      className="mt-1"
+      placeholder="Enter entries here..."
+      rows={10}
+      value={entriesInput}
+      onChange={handleEntriesChange}
+    />
+  </div>
+
+  <div className="w-72"> 
+    <DiceSelection
+      onDiceRollComplete={(result) => {
+        setRoundsMode('dice_rolled');
+        setFinalNumberOfRounds(result);
+      }}
+      maxDiceOptions={5}
+    />
+  </div>
+</div>
+
+
+{/* <Card className="w-full">
+  <CardContent>
+    <Label>Entries</Label>
+    <div className="relative">
+    <Textarea
+      id="entries"
+      className="mt-1"
+      placeholder="Enter entries here..."
+      rows={10}
+      value={entriesInput}
+      onChange={handleEntriesChange}
+    />
+     
+    </div>
+  </CardContent>
+</Card> */}
+
+
                 <p className="text-sm font-medium text-gray-600 dark:text-gray-400"># of Entries - {entryCount}</p>
               </div>
             </div>

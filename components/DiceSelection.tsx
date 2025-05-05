@@ -39,7 +39,7 @@ const DiceSelection: React.FC<DiceSelectionProps> = ({ onDiceRollComplete, maxDi
   return (
     <div className="p-4 border border-dashed border-gray-400 dark:border-gray-600 rounded-lg my-4 bg-gray-50 dark:bg-gray-700/50">
       <p className="text-center font-semibold mb-3 text-gray-700 dark:text-gray-300">Choose number of dice to roll (Quantum RNG):</p>
-      <div className="flex flex-wrap justify-center gap-3 mb-4">
+      <div className="flex flex-col items-start gap-3 mb-4">
         {[...Array(maxDiceOptions)].map((_, i) => {
           const diceCount = i + 1;
           return (
