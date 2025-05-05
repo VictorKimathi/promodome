@@ -1,0 +1,96 @@
+/* DiceSelection.css */
+
+.dice-container {
+    perspective: 1000px;
+    margin: 0 10px;
+  }
+  
+  .dice-cube {
+    width: 50px;
+    height: 50px;
+    position: relative;
+    transform-style: preserve-3d;
+    transition: transform 0.5s ease-out; /* Smooth transition when stopping */
+    /* CSS variables for random rotation during animation */
+    --random-x: 0deg;
+    --random-y: 0deg;
+  }
+  
+  .dice-cube.is-rolling {
+    animation: roll 1.5s linear infinite; 
+  }
+  
+  .dice-face {
+    position: absolute;
+    width: 50px;
+    height: 50px;
+    background-color: #f0f0f0;
+    border: 2px solid #333;
+    border-radius: 5px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 5px; /* Padding for dot positioning */
+    box-sizing: border-box;
+    backface-visibility: hidden; /* Hide back of faces */
+  }
+  
+  /* Position faces using translateZ and rotate */
+  .dice-face.front  { transform: rotateY(  0deg) translateZ(25px); }
+  .dice-face.back   { transform: rotateY(180deg) translateZ(25px); }
+  .dice-face.right  { transform: rotateY( 90deg) translateZ(25px); }
+  .dice-face.left   { transform: rotateY(-90deg) translateZ(25px); }
+  .dice-face.top    { transform: rotateX( 90deg) translateZ(25px); }
+  .dice-face.bottom { transform: rotateX(-90deg) translateZ(25px); }
+  
+  /* Dot styling */
+  .dot {
+    display: block;
+    width: 10px;
+    height: 10px;
+    background-color: #333;
+    border-radius: 50%;
+    position: absolute;
+  }
+  
+  /* Dot positioning for each face */
+  /* Face 1 */
+  .front .center { top: 50%; left: 50%; transform: translate(-50%, -50%); }
+  
+  /* Face 2 */
+  .right .top.right { top: 10px; right: 10px; }
+  .right .bottom.left { bottom: 10px; left: 10px; }
+  
+  /* Face 3 */
+  .top .top.right { top: 10px; right: 10px; }
+  .top .center { top: 50%; left: 50%; transform: translate(-50%, -50%); }
+  .top .bottom.left { bottom: 10px; left: 10px; }
+  
+  /* Face 4 */
+  .bottom .top.left { top: 10px; left: 10px; }
+  .bottom .top.right { top: 10px; right: 10px; }
+  .bottom .bottom.left { bottom: 10px; left: 10px; }
+  .bottom .bottom.right { bottom: 10px; right: 10px; }
+  
+  /* Face 5 */
+  .left .top.left { top: 10px; left: 10px; }
+  .left .top.right { top: 10px; right: 10px; }
+  .left .center { top: 50%; left: 50%; transform: translate(-50%, -50%); }
+  .left .bottom.left { bottom: 10px; left: 10px; }
+  .left .bottom.right { bottom: 10px; right: 10px; }
+  
+  /* Face 6 */
+  .back .top.left { top: 10px; left: 10px; }
+  .back .top.right { top: 10px; right: 10px; }
+  .back .middle.left { top: 50%; left: 10px; transform: translateY(-50%); }
+  .back .middle.right { top: 50%; right: 10px; transform: translateY(-50%); }
+  .back .bottom.left { bottom: 10px; left: 10px; }
+  .back .bottom.right { bottom: 10px; right: 10px; }
+  
+  /* Rolling animation */
+  @keyframes roll {
+    0% { transform: rotateX(0deg) rotateY(0deg); }
+    100% { transform: rotateX(calc(var(--random-x) * 4)) rotateY(calc(var(--random-y) * 4)); } /* Multiply random degrees for faster spin */
+  }
+  
+  

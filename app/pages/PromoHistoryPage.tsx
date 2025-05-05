@@ -1,8 +1,8 @@
 import React from 'react';
 import { Button } from "@/components/ui/button";
-import { ScrollArea } from "@/components/ui/scroll-area";
+import { ScrollArea } from '@radix-ui/react-scroll-area';
 
-interface Result {
+export interface Result {
   id: string;
   promoName: string;
   rounds: number;
@@ -30,36 +30,34 @@ const PromoHistoryPage: React.FC<PromoHistoryPageProps> = ({ history, onNavigate
         {history.length === 0 ? (
           <p className="text-center text-gray-500 dark:text-gray-400 mt-10">No past promotions found.</p>
         ) : (
-          <ScrollArea className="h-[calc(100vh-150px)] pr-2">
-            <div className="overflow-x-auto">
-              <table className="min-w-full border border-gray-300 dark:border-gray-700 text-sm">
-                <thead className="bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-gray-100">
-                  <tr>
-                    <th className="p-3 text-left">Promo Name</th>
-                    <th className="p-3 text-left">Date</th>
-                    <th className="p-3 text-left">Rounds</th>
-                    <th className="p-3 text-left">Winner(s)</th>
+          <ScrollArea className="max-h-[70vh] overflow-auto rounded-lg border border-gray-200 dark:border-gray-700">
+            <table className="min-w-full text-sm text-left text-gray-700 dark:text-gray-300">
+              <thead className="bg-gray-200 dark:bg-gray-800 text-xs uppercase font-medium text-gray-700 dark:text-gray-300">
+                <tr>
+                  <th className="px-4 py-3">Promo Name</th>
+                  <th className="px-4 py-3">Completed On</th>
+                  <th className="px-4 py-3">Rounds</th>
+                  <th className="px-4 py-3">Top Winner</th>
+                  <th className="px-4 py-3">More Winners</th>
+                </tr>
+              </thead>
+              <tbody>
+                {history.map((item) => (
+                  <tr
+                    key={item.id}
+                    className="border-b border-gray-100 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+                  >
+                    <td className="px-4 py-3 font-semibold">{item.promoName || 'Untitled Promo'}</td>
+                    <td className="px-4 py-3">{new Date(item.timestamp).toLocaleString()}</td>
+                    <td className="px-4 py-3">{item.rounds}</td>
+                    <td className="px-4 py-3">{item.winners[0] || 'N/A'}</td>
+                    <td className="px-4 py-3">
+                      {item.winners.length > 1 ? `+${item.winners.length - 1} more` : '—'}
+                    </td>
                   </tr>
-                </thead>
-                <tbody className="bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-200">
-                  {history.map((item) => (
-                    <tr key={item.id} className="border-t border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700 transition">
-                      <td className="p-3">{item.promoName || 'Untitled Promo'}</td>
-                      <td className="p-3">{new Date(item.timestamp).toLocaleString()}</td>
-                      <td className="p-3">{item.rounds}</td>
-                      <td className="p-3">
-                        {item.winners.length > 0 ? item.winners[0] : 'N/A'}
-                        {item.winners.length > 1 && (
-                          <span className="text-xs text-gray-500 dark:text-gray-400 ml-1">
-                            (+{item.winners.length - 1} more)
-                          </span>
-                        )}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+                ))}
+              </tbody>
+            </table>
           </ScrollArea>
         )}
       </div>

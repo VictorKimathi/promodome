@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -9,6 +9,7 @@ import {
   CardContent,
   CardHeader,
   CardFooter,
+  CardTitle,
 } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
@@ -18,7 +19,8 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { Info, Crown, Dices } from "lucide-react";
+import { Info, Crown, Dices, Loader2 } from "lucide-react";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import DiceSelection from "../../components/DiceSelection";
 import { v4 as uuidv4 } from "uuid";
 
@@ -47,6 +49,58 @@ interface PromoSetupPageProps {
   onPromoComplete: (result: Result) => void;
 }
 
+const visualShuffle = (array: string[]): string[] => {
+  let shuffled = [...array];
+  for (let i = shuffled.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+  }
+  return shuffled;
+};
+
+const performFinalShuffle = (participants: string[], rounds: number): string[] => {
+  let array = [...participants];
+  for (let round = 0; round < rounds; round++) {
+    for (let i = array.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [array[i], array[j]] = [array[j], array[i]];
+    }
+  }
+  return array;
+};
+
+const ShufflingAnimation: React.FC<{
+  entries: string[];
+  currentRound: number;
+  totalRounds: number;
+}> = ({ entries, currentRound, totalRounds }) => {
+  return (
+    <div className="absolute inset-0 bg-gray-800 bg-opacity-90 flex flex-col justify-center items-center z-50 p-4">
+      <Loader2 className="h-16 w-16 text-white animate-spin mb-6" />
+      <h2 className="text-2xl font-bold text-white mb-4">Shuffling Entries...</h2>
+      <p className="text-xl text-gray-300 mb-6">
+        Round {currentRound} / {totalRounds}
+      </p>
+      <Card className="w-full max-w-md bg-gray-700 border-gray-600">
+        <CardHeader className="pb-2">
+          <CardTitle className="text-lg text-gray-200 text-center">
+            Current Order
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <ScrollArea className="h-60 w-full rounded-md border border-gray-500 p-3 bg-gray-800">
+            <ol className="list-decimal list-inside space-y-1 text-gray-200">
+              {entries.map((entry, index) => (
+                <li key={index}>{entry}</li>
+              ))}
+            </ol>
+          </ScrollArea>
+        </CardContent>
+      </Card>
+    </div>
+  );
+};
+
 const PromoSetupPage: React.FC<PromoSetupPageProps> = ({ onPromoComplete }) => {
   const [promoTitle, setPromoTitle] = useState("");
   const [entriesInput, setEntriesInput] = useState("");
@@ -57,23 +111,28 @@ const PromoSetupPage: React.FC<PromoSetupPageProps> = ({ onPromoComplete }) => {
   const [numberOfWinners, setNumberOfWinners] = useState(1);
   const [error, setError] = useState("");
   const [isProcessing, setIsProcessing] = useState(false);
-  const [currentTime, setCurrentTime] = useState<Date | null>(null); // Initialize as null to defer rendering
+  const [isShuffling, setIsShuffling] = useState(false);
+  const [currentTime, setCurrentTime] = useState<Date | null>(null);
   const [roundsMode, setRoundsMode] = useState<
     "manual" | "dice_prompt" | "dice_rolled"
   >("manual");
-  const [isMounted, setIsMounted] = useState(false); // Track client-side mounting
+  const [isMounted, setIsMounted] = useState(false);
+  const [shufflingDisplayList, setShufflingDisplayList] = useState<string[]>([]);
+  const [shufflingDisplayRound, setShufflingDisplayRound] = useState(1);
 
-  // Set up client-side effects after mount
+  const visualShuffleIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const roundUpdateIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const animationTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
   useEffect(() => {
-    setIsMounted(true); // Indicate component is mounted
-    setCurrentTime(new Date()); // Initialize time on client
+    setIsMounted(true);
+    setCurrentTime(new Date());
     const timer = setInterval(() => {
       setCurrentTime(new Date());
     }, 1000);
     return () => clearInterval(timer);
   }, []);
 
-  // Update final rounds when manual input changes
   useEffect(() => {
     if (roundsMode === "manual") {
       const rounds = parseInt(numberOfRoundsInput);
@@ -89,9 +148,71 @@ const PromoSetupPage: React.FC<PromoSetupPageProps> = ({ onPromoComplete }) => {
     }
   }, [numberOfRoundsInput, roundsMode]);
 
-  const handleEntriesChange = (
-    event: React.ChangeEvent<HTMLTextAreaElement>
-  ) => {
+  useEffect(() => {
+    if (isShuffling && finalNumberOfRounds && finalNumberOfRounds > 0) {
+      const participants = entriesInput
+        .split("\n")
+        .map((line) => line.trim())
+        .filter((line) => line !== "");
+      setShufflingDisplayList(participants);
+      setShufflingDisplayRound(1);
+
+      const animationDuration = 5000;
+      const visualShuffleIntervalTime = 150;
+      const roundUpdateIntervalTime = Math.max(
+        100,
+        animationDuration / finalNumberOfRounds
+      );
+
+      visualShuffleIntervalRef.current = setInterval(() => {
+        setShufflingDisplayList((prevList) => visualShuffle(prevList));
+      }, visualShuffleIntervalTime);
+
+      if (finalNumberOfRounds > 1) {
+        roundUpdateIntervalRef.current = setInterval(() => {
+          setShufflingDisplayRound((prevRound) =>
+            Math.min(prevRound + 1, finalNumberOfRounds)
+          );
+        }, roundUpdateIntervalTime);
+      }
+
+      animationTimeoutRef.current = setTimeout(() => {
+        if (visualShuffleIntervalRef.current)
+          clearInterval(visualShuffleIntervalRef.current);
+        if (roundUpdateIntervalRef.current)
+          clearInterval(roundUpdateIntervalRef.current);
+
+        const finalShuffledList = performFinalShuffle(
+          participants,
+          finalNumberOfRounds
+        );
+        const selectedWinners = finalShuffledList.slice(0, numberOfWinners);
+
+        const result: Result = {
+          id: uuidv4(),
+          promoName: promoTitle || "Untitled Promo",
+          rounds: finalNumberOfRounds,
+          rankedList: finalShuffledList,
+          winners: selectedWinners,
+          timestamp: new Date().toISOString(),
+        };
+
+        onPromoComplete(result);
+        setIsShuffling(false);
+        setIsProcessing(false);
+      }, animationDuration);
+    }
+
+    return () => {
+      if (visualShuffleIntervalRef.current)
+        clearInterval(visualShuffleIntervalRef.current);
+      if (roundUpdateIntervalRef.current)
+        clearInterval(roundUpdateIntervalRef.current);
+      if (animationTimeoutRef.current) clearTimeout(animationTimeoutRef.current);
+    };
+  }, [isShuffling]);
+
+  const handleEntriesChange = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
     const newEntries = event.target.value;
     setEntriesInput(newEntries);
     const lines = newEntries.split("\n").filter((line) => line.trim() !== "");
@@ -113,51 +234,32 @@ const PromoSetupPage: React.FC<PromoSetupPageProps> = ({ onPromoComplete }) => {
       setError("Please add at least one entry.");
       return;
     }
-
     if (finalNumberOfRounds === null || finalNumberOfRounds <= 0) {
       setError(
         "Please set a valid number of rounds (greater than 0) either manually or using the dice."
       );
       return;
     }
-
     if (numberOfWinners <= 0) {
       setError("Number of winners must be greater than 0.");
       return;
     }
-
     if (numberOfWinners > participants.length) {
       setError("Number of winners cannot exceed the number of entries.");
       return;
     }
 
     setIsProcessing(true);
-
-    setTimeout(() => {
-      let array = [...participants];
-      for (let round = 0; round < finalNumberOfRounds; round++) {
-        for (let i = array.length - 1; i > 0; i--) {
-          const j = Math.floor(Math.random() * (i + 1));
-          [array[i], array[j]] = [array[j], array[i]];
-        }
-      }
-
-      const selectedWinners = array.slice(0, numberOfWinners);
-      const result: Result = {
-        id: uuidv4(),
-        promoName: promoTitle || "Untitled Promo",
-        rounds: finalNumberOfRounds,
-        rankedList: array,
-        winners: selectedWinners,
-        timestamp: new Date().toISOString(),
-      };
-
-      setIsProcessing(false);
-      onPromoComplete(result);
-    }, 1500);
+    setIsShuffling(true);
   };
 
   const handleCancel = () => {
+    if (visualShuffleIntervalRef.current)
+      clearInterval(visualShuffleIntervalRef.current);
+    if (roundUpdateIntervalRef.current)
+      clearInterval(roundUpdateIntervalRef.current);
+    if (animationTimeoutRef.current) clearTimeout(animationTimeoutRef.current);
+
     setPromoTitle("");
     setEntriesInput("");
     setNumberOfRoundsInput("");
@@ -165,6 +267,7 @@ const PromoSetupPage: React.FC<PromoSetupPageProps> = ({ onPromoComplete }) => {
     setNumberOfWinners(1);
     setError("");
     setIsProcessing(false);
+    setIsShuffling(false);
     setRoundsMode("manual");
   };
 
@@ -190,19 +293,27 @@ const PromoSetupPage: React.FC<PromoSetupPageProps> = ({ onPromoComplete }) => {
 
   return (
     <TooltipProvider>
-      <div className="min-h-screen bg-gray-100 dark:bg-gray-900 p-4 md:p-8 flex flex-col items-center">
+      <div className="min-h-screen bg-gray-100 dark:bg-gray-900 p-4 md:p-8 flex flex-col items-center relative">
+        {isShuffling && finalNumberOfRounds && (
+          <ShufflingAnimation
+            entries={shufflingDisplayList}
+            currentRound={shufflingDisplayRound}
+            totalRounds={finalNumberOfRounds}
+          />
+        )}
+
         <Card className="w-full max-w-3xl shadow-lg bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
-          <CardHeader className="text-center  border-b border-gray-200 dark:border-gray-700">
-            <div className="flex flex-row items-center justify-between w-full    max-w-3xl">
+          <CardHeader className="text-center  border-b  border-gray-200 dark:border-gray-700">
+            <div className="flex flex-row  items-center justify-between w-full max-w-3xl">
               <h1 className="text-3xl font-bold tracking-[0.1em] text-sky-400">
                 Dev info-PAGE LAYOUT
               </h1>
-              <span className="text-3xl font-semibold text-black-600  dark:text-gray-400">
+              <span className="text-3xl font-semibold text-black-600 dark:text-gray-400">
                 Quantum RNG
               </span>
             </div>
             <div className="pt-4">
-              <h1 className="text-7xl     tracking-[1.0em]       text-red-500 font-bold tracking-wider mb-1">
+              <h1 className="text-7xl tracking-[1.0em] text-red-500 font-bold tracking-wider mb-1">
                 PROMO
               </h1>
               <h2 className="text-4xl text-red-500 font-bold tracking-[0.3em]">
@@ -212,73 +323,70 @@ const PromoSetupPage: React.FC<PromoSetupPageProps> = ({ onPromoComplete }) => {
           </CardHeader>
 
           <CardContent className="p-6 space-y-5">
-          <div className="flex flex-row space-y-4">
-  {/* Promo Title Block */}
-  <div className="flex  items-center space-x-3">
-    <Label
-      htmlFor="promo-title"
-      className="w-28 text-right font-semibold text-gray-700 dark:text-gray-300 flex-shrink-0"
-    >
-      Promo Title
-    </Label>
-    <Input
-      id="promo-title"
-      placeholder="(Title/name of your promotion)"
-      value={promoTitle}
-      onChange={(e) => setPromoTitle(e.target.value)}
-      className="flex-grow dark:bg-gray-700 dark:text-white dark:border-gray-600 placeholder-gray-400 dark:placeholder-gray-500"
-    />
-  </div>
+            <div className="flex flex-row space-y-4">
+              <div className="flex items-center space-x-3">
+                <Label
+                  htmlFor="promo-title"
+                  className="w-28 text-right font-semibold text-gray-700 dark:text-gray-300 flex-shrink-0"
+                >
+                  Promo Title
+                </Label>
+                <Input
+                  id="promo-title"
+                  placeholder="(Title/name of your promotion)"
+                  value={promoTitle}
+                  onChange={(e) => setPromoTitle(e.target.value)}
+                  className="flex-grow dark:bg-gray-700 dark:text-white dark:border-gray-600 placeholder-gray-400 dark:placeholder-gray-500"
+                />
+              </div>
 
-  {/* Rounds Mode Block */}
-  <div className="flex items-center space-x-3">
-    <div className="w-28 flex-shrink-0"></div>
-    <Button
-      variant="outline"
-      className={`text-white font-semibold px-4 py-2 rounded ${
-        roundsMode !== "manual"
-          ? "bg-blue-500 hover:bg-blue-600"
-          : "bg-green-500 hover:bg-green-600"
-      }`}
-      onClick={() =>
-        setRoundsMode(
-          roundsMode === "manual" ? "dice_prompt" : "manual"
-        )
-      }
-      disabled={isProcessing}
-    >
-      {roundsMode === "manual" ? "Roll Dice" : "Enter Manually"}
-      {roundsMode !== "manual" && <Dices className="ml-2 h-4 w-4" />}
-    </Button>
-    <Input
-      id="num-rounds"
-      placeholder="(# of Rounds)"
-      value={numberOfRoundsInput}
-      onChange={(e) => setNumberOfRoundsInput(e.target.value)}
-      className="w-28 dark:bg-gray-700 dark:text-white dark:border-gray-600 placeholder-gray-400 dark:placeholder-gray-500"
-      disabled={roundsMode !== "manual" || isProcessing}
-    />
-    <Tooltip>
-      <TooltipTrigger asChild>
-        <Button
-          variant="ghost"
-          size="icon"
-          className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
-        >
-          <Info className="h-5 w-5" />
-        </Button>
-      </TooltipTrigger>
-      <TooltipContent className="max-w-xs bg-black text-white p-2 rounded shadow-lg text-sm">
-        <p>
-          Click "Roll Dice" for Quantum RNG mode, or enter rounds
-          manually. This determines how many times the list is
-          shuffled.
-        </p>
-      </TooltipContent>
-    </Tooltip>
-  </div>
-</div>
-
+              <div className="flex items-center space-x-3">
+                <div className="w-28 flex-shrink-0"></div>
+                <Button
+                  variant="outline"
+                  className={`text-white font-semibold px-4 py-2 rounded ${
+                    roundsMode !== "manual"
+                      ? "bg-blue-500 hover:bg-blue-600"
+                      : "bg-green-500 hover:bg-green-600"
+                  }`}
+                  onClick={() =>
+                    setRoundsMode(
+                      roundsMode === "manual" ? "dice_prompt" : "manual"
+                    )
+                  }
+                  disabled={isProcessing}
+                >
+                  {roundsMode === "manual" ? "Roll Dice" : "Enter Manually"}
+                  {roundsMode !== "manual" && <Dices className="ml-2 h-4 w-4" />}
+                </Button>
+                <Input
+                  id="num-rounds"
+                  placeholder="(# of Rounds)"
+                  value={numberOfRoundsInput}
+                  onChange={(e) => setNumberOfRoundsInput(e.target.value)}
+                  className="w-28 dark:bg-gray-700 dark:text-white dark:border-gray-600 placeholder-gray-400 dark:placeholder-gray-500"
+                  disabled={roundsMode !== "manual" || isProcessing}
+                />
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+                    >
+                      <Info className="h-5 w-5" />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent className="max-w-xs bg-black text-white p-2 rounded shadow-lg text-sm">
+                    <p>
+                      Click "Roll Dice" for Quantum RNG mode, or enter rounds
+                      manually. This determines how many times the list is
+                      shuffled.
+                    </p>
+                  </TooltipContent>
+                </Tooltip>
+              </div>
+            </div>
 
             {roundsMode === "dice_prompt" && (
               <div className="pl-32">
