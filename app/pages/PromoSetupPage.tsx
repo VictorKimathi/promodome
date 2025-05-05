@@ -270,7 +270,7 @@ const PromoSetupPage: React.FC<PromoSetupPageProps> = ({ onPromoComplete }) => {
             </div>
 
             {/* Number of Winners */}
-            <div className="flex items-center space-x-3">
+            {/* <div className="flex items-center space-x-3">
                 <Label htmlFor="num-winners" className="w-28 text-right font-semibold text-gray-700 dark:text-gray-300 flex-shrink-0">Number of Winners</Label>
                 <Input
                     id="num-winners"
@@ -282,7 +282,7 @@ const PromoSetupPage: React.FC<PromoSetupPageProps> = ({ onPromoComplete }) => {
                     className="w-24 dark:bg-gray-700 dark:text-white dark:border-gray-600"
                     disabled={isProcessing}
                 />
-            </div>
+            </div> */}
 
             {/* Error Display */}
             {error && (
@@ -322,6 +322,12 @@ const PromoSetupPage: React.FC<PromoSetupPageProps> = ({ onPromoComplete }) => {
                )}
                <Crown className="crown-icon right-2 top-1/2 -translate-y-1/2 absolute h-5 w-5 text-yellow-400" />
              </Button>
+             <img 
+               src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAJgAAACUCAMAAABY3hBoAAAAYFBMVEUAAAD////x8fESEhJTU1ORkZGUlJTIyMg9PT2Li4vq6uq5ubnh4eH4+PjT09Pu7u5HR0csLCxnZ2fAwMCrq6sfHx8zMzOysrJgYGCAgIA4ODihoaFbW1sLCwsnJydxcXGKmUPCAAACo0lEQVR4nO3c23KCMBCA4QRajkFQEEU8vP9bloMV0aQTySy7ndn/qhe5+MYqIoQV8ikV7AVi9SGfLGL6M2tQWX1FqoEdsFVDx/wV1mCT7kVqBku+sEFTm2cYIZe4Jg9YdsbGzPKzX1iMTXkpvsNKbMhb4QDzCmzHW6cB9o3N0FT2MGyErlsHa7ERurZKZDtshLZQqAu2QVsg6B0rhm6C2sH13knQ+jZ6dBHoJ4ccx3Ecx3EcB9aXXUVRRPXVX8/lS/tyFVbxWhdFfO8DWZ+XtKvYPob1lTeisI4WEYVJD/ryyFKYlAFVGPBdBAeYBP0IuMCyK1EY6KVxJxjkP9MNFlKFyZoqrFod5iVj+d9wtTqsraOx4rxLc/2a3g92VdUEm3/hNIlJBnb4t4OJrelFA7sHYwkTUaZfl2LDRKVft0GHnfQvGdjdIWuY0C9M8GEb7boc6hedPSykClPadWTfY/ifyka/Duxc0Rbm69/7+Ef+VL8MbkOMHexyMLjgtgWYYE87Sva7wPBF2X0owS5MmWBlPNamG2VkQf5Ocjy1htuj5gZLwFyOMMDLF04wuLe+IwzymqcLDHSXrQMM7HTfEQb5BnOBlcD7dJbCYP+Pi2HqCO1aBMtiyGucS2H5ZoXbIh/DkqrBvsmlwnllGx9X3S9ngqFvc7Q4g2UYwxjGMIYxjGEMYxjDGMYwhjHsH8L0LugdiBYZtjDDbXPiOI7jOI7juP8TzZEqHYvoCftW0JyO07Hwf3tpCwTgwy8uhUKRnPZyVQL2qbSl9UOrwDe4LGkY80XwgDEORiM4HWocJUdmtuOj3+F7GTbkpWlcoVphx5J9+2nAI9wjAEuajcRU4M9y21bPh4jKnMgcsvPb2FWZEpjzeNINqpX5YYvL2ldPDxr+AD/WH+AZSZUAAAAAAElFTkSuQmCC"
+               alt="Description"
+               height = {50}
+               width={50}
+             />
              <Button
                variant="outline"
                onClick={handleCancel}
